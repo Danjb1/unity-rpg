@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
+    public float maxSpeedXZ;
+    public float maxSpeedY;
+    public float acceleration;
+    public float deceleration;
+    public float jumpForce;
+
     private GameObject mainCamera;
     private CharacterController controller;
 
     private Vector3 velocity;
-    private float playerSpeed = 2.0f;
-    private float jumpForce = 1.0f;
-    private float gravityValue = -9.81f;
 
     private void Start() {
         mainCamera = transform.Find("Main Camera").gameObject;
@@ -18,45 +21,87 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Update() {
+        MatchCameraRotation();
+        ResetVelocity();
+        Decelerate();
+        Accelerate();
+        HandleStrafe();
+        ApplyGravity();
+        HandleJump();
+        LimitVelocity();
+        Move();
+    }
 
-        // Rotate based on the camera orientation
+    private void MatchCameraRotation() {
+        // Rotate player model to match the camera rotation
         if (mainCamera != null) {
             transform.rotation = Quaternion.AngleAxis(
                     mainCamera.transform.eulerAngles.y, Vector3.up);
         }
+    }
 
+    private void ResetVelocity() {
         // Reset downward velocity when grounded
         if (controller.isGrounded && velocity.y < 0) {
             velocity.y = 0f;
         }
+    }
 
-        // TODO: Apply deceleration (for now we stop every frame)
-        velocity.x = 0;
-        velocity.z = 0;
+    private void Decelerate() {
+        // Apply deceleration if no direction is held
+        Vector2 velocityXZ = new Vector2(velocity.x, velocity.z);
+        if (Input.GetAxisRaw("Vertical") == 0
+                && Input.GetAxisRaw("Horizontal") == 0) {
+            float scaledDeceleration = deceleration * Time.deltaTime;
+            velocityXZ = ApplyDeceleration(velocityXZ, scaledDeceleration);
+        }
+        velocity.x = velocityXZ.x;
+        velocity.z = velocityXZ.y;
+    }
 
+    private Vector2 ApplyDeceleration(Vector2 velocity, float deceleration) {
+        if (velocity.magnitude == 0) {
+            return velocity;
+        }
+        float newMagnitude = Mathf.Max(0f, velocity.magnitude - deceleration);
+        return velocity.normalized * newMagnitude;
+    }
+
+    private void Accelerate() {
         // Apply acceleration based on player input
-        velocity.x += transform.forward.x
-                * Input.GetAxis("Vertical")
-                * playerSpeed
+        float scaledAcceleration = Input.GetAxisRaw("Vertical")
+                * acceleration
                 * Time.deltaTime;
-        velocity.z += transform.forward.z
-                * Input.GetAxis("Vertical")
-                * playerSpeed
-                * Time.deltaTime;
+        velocity.x += transform.forward.x * scaledAcceleration;
+        velocity.z += transform.forward.z * scaledAcceleration;
+    }
 
+    private void HandleStrafe() {
         // TODO: Strafe based on player input
+    }
 
-        // Apply gravity
-        velocity.y += gravityValue * Time.deltaTime;
+    private void ApplyGravity() {
+        velocity.y += Physics.gravity.y * Time.deltaTime;
+    }
 
-        // Allow jumping when grounded
+    private void HandleJump() {
         if (Input.GetButtonDown("Jump") && controller.isGrounded) {
             velocity.y += jumpForce;
         }
+    }
 
-        // TODO: Cap velocity
+    private void LimitVelocity() {
+        // XZ
+        Vector2 velocityXZ = new Vector2(velocity.x, velocity.z);
+        velocityXZ = Vector2.ClampMagnitude(velocityXZ, maxSpeedXZ);
+        velocity.x = velocityXZ.x;
+        velocity.z = velocityXZ.y;
 
-        // Move with collision
+        // Y
+        velocity.y = Mathf.Clamp(velocity.y, -maxSpeedY, maxSpeedY);
+    }
+
+    private void Move() {
         controller.Move(velocity);
     }
 

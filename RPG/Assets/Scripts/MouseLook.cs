@@ -2,23 +2,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MouseLook : MonoBehaviour
-{
+public class MouseLook : MonoBehaviour {
 
-    public float lookSpeed = 3;
+    public float lookSpeed = 2.5f;
 
-    Vector2 rotation = new Vector2 (0, 0);
+    private const float MAX_ANGLE = 85;
 
-    void Start()
-    {
+    Vector2 currentEulerAngles = new Vector2(0, 0);
 
-    }
+    void Start() { }
 
-    void Update()
-    {
-        rotation.y += Input.GetAxis("Mouse X");
-        rotation.x += -Input.GetAxis("Mouse Y");
-        transform.eulerAngles = (Vector2) rotation * lookSpeed;
+    void Update() {
+
+        // Change our rotation vector based on mouse input
+        currentEulerAngles.y += Input.GetAxis("Mouse X") * lookSpeed;
+        currentEulerAngles.x -= Input.GetAxis("Mouse Y") * lookSpeed;
+
+        // Clamp the rotation so we can't roll the camera
+        currentEulerAngles.x =
+                Mathf.Clamp(currentEulerAngles.x, -MAX_ANGLE, MAX_ANGLE);
+
+        // Finally, rotate the camera
+        transform.eulerAngles = (Vector2) currentEulerAngles;
     }
 
 }
