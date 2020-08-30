@@ -22,17 +22,8 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Update() {
-        MatchCameraRotation();
         CalculateVelocity();
         Move();
-    }
-
-    private void MatchCameraRotation() {
-        // Rotate player model to match the camera rotation
-        if (mainCamera != null) {
-            transform.rotation = Quaternion.AngleAxis(
-                    mainCamera.transform.eulerAngles.y, Vector3.up);
-        }
     }
 
     private void CalculateVelocity() {
