@@ -112,12 +112,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b38e36f8b2a0d534dbf0a7643052ed74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSpeedXZ: 0.05
-  maxSpeedY: 0.1
+  maxSpeedXZ: 0.035
+  maxSpeedY: 1
   acceleration: 1
   groundFriction: 0.25
   airFriction: 0.1
-  jumpForce: 0.125
+  jumpForce: 0.075
 --- !u!1 &8102845529219819416
 GameObject:
   m_ObjectHideFlags: 0
@@ -177,7 +177,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 1000
-  field of view: 80
+  field of view: 60
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
