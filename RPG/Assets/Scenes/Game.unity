@@ -692,21 +692,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 8102845527643844772, guid: 7ee06aa2f77bd494e955679150a59dd9,
-        type: 3}
-      propertyPath: maxSpeedXZ
-      value: 0.035
-      objectReference: {fileID: 0}
-    - target: {fileID: 8102845527643844772, guid: 7ee06aa2f77bd494e955679150a59dd9,
-        type: 3}
-      propertyPath: maxSpeedY
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8102845527643844772, guid: 7ee06aa2f77bd494e955679150a59dd9,
-        type: 3}
-      propertyPath: jumpForce
-      value: 0.075
-      objectReference: {fileID: 0}
     - target: {fileID: 8102845527643844774, guid: 7ee06aa2f77bd494e955679150a59dd9,
         type: 3}
       propertyPath: m_LocalPosition.x
