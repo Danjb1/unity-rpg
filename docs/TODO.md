@@ -4,7 +4,6 @@
 
  - Fine-tune physics
     - Player can jump on top of houses
- - Fix warning about overlapping UVs
  - Hide mouse
 
 ## Assets
