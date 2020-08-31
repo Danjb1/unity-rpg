@@ -4,7 +4,6 @@
 
  - Fine-tune physics
     - Jump feels a little unsatisfying
-    - Player can jump on top of houses
  - Hide mouse
  - Crosshair
  - Store tile types on the Terrain object
@@ -17,7 +16,6 @@
 ## Assets
 
  - Improve house texture
- - Make house taller
  - Add house variants
  - Door
  - Fence
