@@ -3,7 +3,6 @@
 ## Unity
 
  - Day / night cycle
-    - Make sun stay at full intensity for longer
     - Change ambient colour at night
     - Moon looks like a sun
  - Press escape to quit

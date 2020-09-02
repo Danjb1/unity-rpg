@@ -32,6 +32,12 @@ public class DayNightCycle : MonoBehaviour {
     private const float SUN_INTENSITY = 1.0f;
     private const float MOON_INTENSITY = 0.2f;
 
+    /**
+     * Length of each intensity transition, relative to the length of the
+     * day (for the sun) or night (for the moon).
+     */
+    private const float INTENSITY_TRANSITION_LENGTH = 0.15f;
+
     private static readonly Vector3 LIGHT_TILT = new Vector3(-50, 0, 0);
 
     private float currentTimeMs;  // 0 - DAY_LENGTH_MS
@@ -45,7 +51,8 @@ public class DayNightCycle : MonoBehaviour {
         sun = transform.Find("Sun").GetComponent<Light>();
         moon = transform.Find("Moon").GetComponent<Light>();
 
-        SetTime(0);
+        // Midnight
+        SetTime(0.0f);
     }
 
     void Update() {
@@ -80,39 +87,53 @@ public class DayNightCycle : MonoBehaviour {
         if (currentTimeMs >= NIGHT_START_MS) {
             nightTimePassed = currentTimeMs - NIGHT_START_MS;
         } else {
+            // Early morning - be sure to account for the night hours that
+            // elapsed before midnight!
             nightTimePassed = currentTimeMs + (DAY_LENGTH_MS - NIGHT_START_MS);
         }
         return nightTimePassed / NIGHT_LENGTH_MS;
     }
 
     private void UpdateNight(float t) {
+
+        // Move the moon across the sky
         float angle = 180.0f - Mathf.LerpAngle(0.0f, 180.0f, t);
         SetLightAngle(moon, angle);
 
-        if (t < 0.5f) {
+        // Change the brightness over time
+        if (t < INTENSITY_TRANSITION_LENGTH) {
             // Moon rising
-            float t2 = Mathf.InverseLerp(0.0f, 0.5f, t);
+            float t2 = Mathf.InverseLerp(0.0f, INTENSITY_TRANSITION_LENGTH, t);
             moon.intensity = Mathf.Lerp(0.0f, MOON_INTENSITY, t2);
-        } else {
+        } else if (t > 1 - INTENSITY_TRANSITION_LENGTH) {
             // Moon setting
-            float t2 = Mathf.InverseLerp(0.5f, 1.0f, t);
+            float t2 = Mathf.InverseLerp(1 - INTENSITY_TRANSITION_LENGTH, 1.0f, t);
             moon.intensity = Mathf.Lerp(MOON_INTENSITY, 0.0f, t2);
         }
+
+        // Ensure sun is always disabled during the day
+        sun.intensity = 0.0f;
     }
 
     private void UpdateDay(float t) {
+
+        // Move the sun across the sky
         float angle = 180.0f - Mathf.LerpAngle(0.0f, 180.0f, t);
         SetLightAngle(sun, angle);
 
-        if (t < 0.5) {
+        // Change the brightness over time
+        if (t < INTENSITY_TRANSITION_LENGTH) {
             // Sun rising
-            float t2 = Mathf.InverseLerp(0.0f, 0.5f, t);
+            float t2 = Mathf.InverseLerp(0.0f, INTENSITY_TRANSITION_LENGTH, t);
             sun.intensity = Mathf.Lerp(0.0f, SUN_INTENSITY, t2);
-        } else {
+        } else if (t > 1 - INTENSITY_TRANSITION_LENGTH) {
             // Sun setting
-            float t2 = Mathf.InverseLerp(0.5f, 1.0f, t);
+            float t2 = Mathf.InverseLerp(1 - INTENSITY_TRANSITION_LENGTH, 1.0f, t);
             sun.intensity = Mathf.Lerp(SUN_INTENSITY, 0.0f, t2);
         }
+
+        // Ensure moon is always disabled during the day
+        moon.intensity = 0.0f;
     }
 
     private void SetLightAngle(Light light, float angle) {
