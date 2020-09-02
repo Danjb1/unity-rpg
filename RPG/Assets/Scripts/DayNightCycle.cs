@@ -5,9 +5,7 @@ using UnityEngine;
 /**
  * Class that governs the passing of in-game time.
  *
- * There are 24 hours in a day, which are divided into day and night:
- *     NNNNNNDDDDDDDDDDDDDDNNNN
- *
+ * There are 24 hours in a day, which are divided into day and night.
  * During the day, the sun rises in the east and sets in the west.
  * During the night, the same is true of the moon.
  *
@@ -22,6 +20,8 @@ public class DayNightCycle : MonoBehaviour {
     private const int DAY_LENGTH_MS = 10000; // TMP
     private const int HOUR_LENGTH_MS = DAY_LENGTH_MS / HOURS_IN_DAY;
 
+    // Daytime is 06:00-20:00 (14 hours)
+    // Night-time is 20:00-06:00 (10 hours)
     private const int DAYTIME_START_HOUR = 6;
     private const int NIGHT_START_HOUR = 20;
     private const int DAYTIME_START_MS = DAYTIME_START_HOUR * HOUR_LENGTH_MS;
@@ -29,15 +29,10 @@ public class DayNightCycle : MonoBehaviour {
     private const int DAYTIME_LENGTH_MS = NIGHT_START_MS - DAYTIME_START_MS;
     private const int NIGHT_LENGTH_MS = DAY_LENGTH_MS - DAYTIME_LENGTH_MS;
 
-    private const float SUN_INTENSITY_MIN = 0.0f;
-    private const float SUN_INTENSITY_MAX = 1.0f;
-    private const float MOON_INTENSITY_MIN = 0.0f;
-    private const float MOON_INTENSITY_MAX = 0.4f;
+    private const float SUN_INTENSITY = 1.0f;
+    private const float MOON_INTENSITY = 0.2f;
 
-    private static readonly Vector3 SUN_TILT = new Vector3(-50, 0, 0);
-
-    private static readonly Color SUN_COLOR = Color.white;
-    private static readonly Color MOON_COLOR = new Color(0.75f, 0.75f, 1.0f);
+    private static readonly Vector3 LIGHT_TILT = new Vector3(-50, 0, 0);
 
     private float currentTimeMs;  // 0 - DAY_LENGTH_MS
     private float hourOfDay;      // 0 - HOURS_IN_DAY
@@ -95,15 +90,13 @@ public class DayNightCycle : MonoBehaviour {
         SetLightAngle(moon, angle);
 
         if (t < 0.5f) {
-            // Moon rising, sun fading out
-            moon.intensity = Mathf.Lerp(
-                    MOON_INTENSITY_MIN, MOON_INTENSITY_MAX, t);
-            sun.intensity = Mathf.Lerp(SUN_INTENSITY_MIN, 0, t);
+            // Moon rising
+            float t2 = Mathf.InverseLerp(0.0f, 0.5f, t);
+            moon.intensity = Mathf.Lerp(0.0f, MOON_INTENSITY, t2);
         } else {
-            // Moon setting, sun fading in
-            moon.intensity = Mathf.Lerp(
-                    MOON_INTENSITY_MAX, MOON_INTENSITY_MIN, t);
-            sun.intensity = Mathf.Lerp(SUN_INTENSITY_MIN, 0, t);
+            // Moon setting
+            float t2 = Mathf.InverseLerp(0.5f, 1.0f, t);
+            moon.intensity = Mathf.Lerp(MOON_INTENSITY, 0.0f, t2);
         }
     }
 
@@ -112,13 +105,13 @@ public class DayNightCycle : MonoBehaviour {
         SetLightAngle(sun, angle);
 
         if (t < 0.5) {
-            // Sun rising, moon fading out
-            sun.intensity = Mathf.Lerp(SUN_INTENSITY_MIN, SUN_INTENSITY_MAX, t);
-            moon.intensity = Mathf.Lerp(MOON_INTENSITY_MIN, 0, t);
+            // Sun rising
+            float t2 = Mathf.InverseLerp(0.0f, 0.5f, t);
+            sun.intensity = Mathf.Lerp(0.0f, SUN_INTENSITY, t2);
         } else {
-            // Sun setting, moon fading in
-            sun.intensity = Mathf.Lerp(SUN_INTENSITY_MAX, SUN_INTENSITY_MIN, t);
-            moon.intensity = Mathf.Lerp(0, MOON_INTENSITY_MIN, t);
+            // Sun setting
+            float t2 = Mathf.InverseLerp(0.5f, 1.0f, t);
+            sun.intensity = Mathf.Lerp(SUN_INTENSITY, 0.0f, t2);
         }
     }
 
@@ -128,7 +121,7 @@ public class DayNightCycle : MonoBehaviour {
         light.transform.eulerAngles = new Vector3(angle, 90, 0);
 
         // Tilt the light to give us a more interesting angle
-        light.transform.Rotate(SUN_TILT, Space.World);
+        light.transform.Rotate(LIGHT_TILT, Space.World);
     }
 
 }

@@ -3,9 +3,7 @@
 ## Unity
 
  - Day / night cycle
-    - Transition from sun to moon is very abrupt
-    - Using Lerp from t=0-0.5 will not produce the full range of values
-    - Fine-tune lighting values
+    - Make sun stay at full intensity for longer
     - Change ambient colour at night
     - Moon looks like a sun
  - Press escape to quit
