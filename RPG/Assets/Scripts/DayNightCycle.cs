@@ -29,10 +29,10 @@ public class DayNightCycle : MonoBehaviour {
     private const int DAYTIME_LENGTH_MS = NIGHT_START_MS - DAYTIME_START_MS;
     private const int NIGHT_LENGTH_MS = DAY_LENGTH_MS - DAYTIME_LENGTH_MS;
 
-    private const float SUN_INTENSITY_MIN = 0.5f;
+    private const float SUN_INTENSITY_MIN = 0.0f;
     private const float SUN_INTENSITY_MAX = 1.0f;
-    private const float MOON_INTENSITY_MIN = 0.25f;
-    private const float MOON_INTENSITY_MAX = 0.5f;
+    private const float MOON_INTENSITY_MIN = 0.0f;
+    private const float MOON_INTENSITY_MAX = 0.4f;
 
     private static readonly Vector3 SUN_TILT = new Vector3(-50, 0, 0);
 
@@ -91,10 +91,10 @@ public class DayNightCycle : MonoBehaviour {
     }
 
     private void UpdateNight(float t) {
-        float angle = Mathf.LerpAngle(0, 180, t);
+        float angle = 180.0f - Mathf.LerpAngle(0.0f, 180.0f, t);
         SetLightAngle(moon, angle);
 
-        if (t < 0.5) {
+        if (t < 0.5f) {
             // Moon rising, sun fading out
             moon.intensity = Mathf.Lerp(
                     MOON_INTENSITY_MIN, MOON_INTENSITY_MAX, t);
@@ -108,7 +108,7 @@ public class DayNightCycle : MonoBehaviour {
     }
 
     private void UpdateDay(float t) {
-        float angle = Mathf.LerpAngle(0, 180, t);
+        float angle = 180.0f - Mathf.LerpAngle(0.0f, 180.0f, t);
         SetLightAngle(sun, angle);
 
         if (t < 0.5) {

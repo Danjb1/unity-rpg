@@ -4,10 +4,10 @@
 
  - Day / night cycle
     - Transition from sun to moon is very abrupt
-    - Ensure both lights have zero intensity before fading in whichever is due
+    - Using Lerp from t=0-0.5 will not produce the full range of values
     - Fine-tune lighting values
+    - Change ambient colour at night
     - Moon looks like a sun
-    - Check ambient occlusion
  - Press escape to quit
  - Fine-tune physics
     - Jump feels a little unsatisfying
