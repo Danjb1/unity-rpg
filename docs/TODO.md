@@ -2,6 +2,12 @@
 
 ## Unity
 
+ - Day / night cycle
+    - Transition from sun to moon is very abrupt
+    - Ensure both lights have zero intensity before fading in whichever is due
+    - Fine-tune lighting values
+    - Moon looks like a sun
+    - Check ambient occlusion
  - Press escape to quit
  - Fine-tune physics
     - Jump feels a little unsatisfying
@@ -14,7 +20,6 @@
  - Changing scenes (doors)
  - Loading adjacent chunks
  - Minimap
- - Day / night cycle
  - Inventory
  - Combat
     - Melee

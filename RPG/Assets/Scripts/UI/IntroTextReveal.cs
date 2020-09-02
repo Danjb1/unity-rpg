@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class IntroTextReveal : MonoBehaviour {
 
-    private const float CHARACTER_REVEAL_DELAY = 0.02f;   // Seconds
+    private const float CHARACTER_REVEAL_DELAY = 0.025f;   // Seconds
 
     private TextMeshProUGUI textMesh;
     private string fullText;
@@ -19,9 +20,18 @@ public class IntroTextReveal : MonoBehaviour {
     }
 
     void Update() {
-        // TODO: If space is pressed, reveal all characters
-        // TODO: If space is pressed and all characters are revealed,
-        //        load the game!
+        if (Input.GetButtonUp("Jump")) {
+            if (revealedChars < fullText.Length) {
+                RevealAllCharacters();
+            } else {
+                StartGame();
+            }
+        }
+    }
+
+    private void RevealAllCharacters() {
+        revealedChars = fullText.Length;
+        textMesh.text = fullText.Substring(0, revealedChars);
     }
 
     IEnumerator RevealCharacter() {
@@ -30,6 +40,10 @@ public class IntroTextReveal : MonoBehaviour {
             textMesh.text = fullText.Substring(0, revealedChars);
             yield return new WaitForSeconds(CHARACTER_REVEAL_DELAY);
         }
+    }
+
+    private void StartGame() {
+        SceneManager.LoadScene("Game");
     }
 
 }
