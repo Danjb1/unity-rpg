@@ -3,8 +3,11 @@
 ## Unity
 
  - Day / night cycle
-    - Change ambient colour at night
+    - Make dusk / dawn one hour long?
+    - Should "night" be true during dusk and dawn?
+    - Separate the passing of time into a different script, for interiors
     - Moon looks like a sun
+ - Weather
  - Press escape to quit
  - Fine-tune physics
     - Jump feels a little unsatisfying
