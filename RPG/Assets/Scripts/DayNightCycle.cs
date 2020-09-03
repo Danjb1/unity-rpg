@@ -19,19 +19,6 @@ using UnityEngine;
  */
 public class DayNightCycle : MonoBehaviour {
 
-    private const int HOURS_IN_DAY = 24;
-    private const int DAY_LENGTH_MS = 10000; // TMP
-    private const int HOUR_LENGTH_MS = DAY_LENGTH_MS / HOURS_IN_DAY;
-
-    // Daytime is 06:00-20:00 (14 hours)
-    // Night-time is 20:00-06:00 (10 hours)
-    private const int DAYTIME_START_HOUR = 6;
-    private const int NIGHT_START_HOUR = 20;
-    private const int DAYTIME_START_MS = DAYTIME_START_HOUR * HOUR_LENGTH_MS;
-    private const int NIGHT_START_MS = NIGHT_START_HOUR * HOUR_LENGTH_MS;
-    private const int DAYTIME_LENGTH_MS = NIGHT_START_MS - DAYTIME_START_MS;
-    private const int NIGHT_LENGTH_MS = DAY_LENGTH_MS - DAYTIME_LENGTH_MS;
-
     private const float SUN_INTENSITY = 1.0f;
     private const float MOON_INTENSITY = 0.2f;
 
@@ -52,10 +39,7 @@ public class DayNightCycle : MonoBehaviour {
 
     private static readonly Vector3 LIGHT_TILT = new Vector3(-50, 0, 0);
 
-    private float currentTimeMs;  // 0 - DAY_LENGTH_MS
-    private float hourOfDay;      // 0 - HOURS_IN_DAY
-    private bool night;
-
+    private GameTime time;
     private Light sun;
     private Light moon;
 
@@ -63,24 +47,11 @@ public class DayNightCycle : MonoBehaviour {
         sun = transform.Find("Sun").GetComponent<Light>();
         moon = transform.Find("Moon").GetComponent<Light>();
 
-        // Midnight
-        SetTime(0.0f);
+        time = GameLogic.Instance.GameTime;
     }
 
     void Update() {
-        SetTime(currentTimeMs + Time.deltaTime * 1000);
-    }
-
-    private void SetTime(float newTimeMs) {
-        currentTimeMs = newTimeMs % DAY_LENGTH_MS;
-        hourOfDay = currentTimeMs / HOUR_LENGTH_MS;
-        night = (hourOfDay < DAYTIME_START_HOUR
-                || hourOfDay >= NIGHT_START_HOUR);
-        Refresh();
-    }
-
-    private void Refresh() {
-        if (night) {
+        if (time.IsNight()) {
             float t = CalculateNightTimeProgress();
             UpdateNight(t);
         } else {
@@ -90,20 +61,23 @@ public class DayNightCycle : MonoBehaviour {
     }
 
     private float CalculateDaytimeProgress() {
-        float dayTimePassed = currentTimeMs - DAYTIME_START_MS;
-        return dayTimePassed / DAYTIME_LENGTH_MS;
+        float dayTimePassed =
+                time.GetCurrentTimeMs() - GameTime.DAYTIME_START_MS;
+        return dayTimePassed / GameTime.DAYTIME_LENGTH_MS;
     }
 
     private float CalculateNightTimeProgress() {
         float nightTimePassed;
-        if (currentTimeMs >= NIGHT_START_MS) {
-            nightTimePassed = currentTimeMs - NIGHT_START_MS;
+        if (time.GetCurrentTimeMs() >= GameTime.NIGHT_START_MS) {
+            nightTimePassed =
+                    time.GetCurrentTimeMs() - GameTime.NIGHT_START_MS;
         } else {
             // Early morning - be sure to account for the night hours that
             // elapsed before midnight!
-            nightTimePassed = currentTimeMs + (DAY_LENGTH_MS - NIGHT_START_MS);
+            nightTimePassed = time.GetCurrentTimeMs()
+                    + (GameTime.DAY_LENGTH_MS - GameTime.NIGHT_START_MS);
         }
-        return nightTimePassed / NIGHT_LENGTH_MS;
+        return nightTimePassed / GameTime.NIGHT_LENGTH_MS;
     }
 
     private void UpdateNight(float t) {
@@ -168,7 +142,8 @@ public class DayNightCycle : MonoBehaviour {
 
         } else {
             // Day - Dusk (sun setting)
-            float t2 = Mathf.InverseLerp(1 - INTENSITY_TRANSITION_LENGTH, 1.0f, t);
+            float t2 = Mathf.InverseLerp(
+                    1 - INTENSITY_TRANSITION_LENGTH, 1.0f, t);
             intensity = Mathf.Lerp(SUN_INTENSITY, 0.0f, t2);
             ambientLight =
                     Color.Lerp(AMBIENT_COLOR_DAY, AMBIENT_COLOR_DUSK, t2);

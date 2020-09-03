@@ -5,8 +5,9 @@
  - Day / night cycle
     - Make dusk / dawn one hour long?
     - Should "night" be true during dusk and dawn?
-    - Separate the passing of time into a different script, for interiors
     - Moon looks like a sun
+ - Create a "Startup" scene containing just the core GameObjects / scripts
+    - This should then load the scene containing the actual location
  - Weather
  - Press escape to quit
  - Fine-tune physics
@@ -18,6 +19,7 @@
  - Terrain elevation
  - Footstep sounds
  - Changing scenes (doors)
+    - DayNightCycle should deactivate when entering interiors
  - Loading adjacent chunks
  - Minimap
  - Inventory
