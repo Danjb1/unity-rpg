@@ -2,10 +2,7 @@
 
 ## Unity
 
- - Day / night cycle
-    - Make dusk / dawn one hour long?
-    - Should "night" be true during dusk and dawn?
-    - Moon looks like a sun
+ - Moon looks like a sun
  - Create a "Startup" scene containing just the core GameObjects / scripts
     - This should then load the scene containing the actual location
  - Weather

@@ -13,6 +13,7 @@
       "NewLineForCatch": false,
       "NewLineForFinally": false,
       "SpaceAfterCast": true,
+      "SpacesIgnoreAroundVariableDeclaration": true,
       "SpacingAroundBinaryOperator": "ignore"
   }
 }
