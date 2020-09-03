@@ -2,7 +2,6 @@
 
 ## Unity
 
- - Moon looks like a sun
  - Create a "Startup" scene containing just the core GameObjects / scripts
     - This should then load the scene containing the actual location
  - Weather
@@ -32,3 +31,5 @@
  - Chimney
  - Fence
  - Custom skybox
+ - Sun
+ - Moon

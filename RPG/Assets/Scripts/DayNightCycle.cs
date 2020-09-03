@@ -21,19 +21,27 @@ using DayPhase = GameTime.DayPhase;
  */
 public class DayNightCycle : MonoBehaviour {
 
+    // Sun / Moon properties
     private const float SUN_INTENSITY = 1.0f;
     private const float MOON_INTENSITY = 0.2f;
+    private static readonly Vector3 LIGHT_TILT = new Vector3(-50, 0, 0);
 
+    // Ambient light
     private static readonly Color AMBIENT_COLOR_DAWN
             = new Color(0.5f, 0.4f, 0.35f);
     private static readonly Color AMBIENT_COLOR_DAY
             = new Color(0.5f, 0.5f, 0.5f);
     private static readonly Color AMBIENT_COLOR_DUSK
-            = new Color(0.5f, 0.35f, 0.5f);
+            = new Color(0.4f, 0.35f, 0.4f);
     private static readonly Color AMBIENT_COLOR_NIGHT
             = new Color(0.25f, 0.35f, 0.5f);
 
-    private static readonly Vector3 LIGHT_TILT = new Vector3(-50, 0, 0);
+    // Sky tint
+    private const string SKYBOX_COLOUR_PARAM = "_SkyTint";
+    private static readonly Color SKY_TINT_DAWN = new Color(1.0f, 0.5f, 0.0f);
+    private static readonly Color SKY_TINT_DAY = Color.white;
+    private static readonly Color SKY_TINT_DUSK = new Color(0.5f, 0.25f, 0.5f);
+    private static readonly Color SKY_TINT_NIGHT = new Color(0.1f, 0.1f, 0.1f);
 
     private GameTime time;
     private Light sun;
@@ -46,19 +54,23 @@ public class DayNightCycle : MonoBehaviour {
         time = GameLogic.Instance.GameTime;
     }
 
+    void OnDestroy() {
+        // Revert the sky tint
+        RenderSettings.skybox.SetColor(SKYBOX_COLOUR_PARAM, Color.white);
+    }
+
     void Update() {
         UpdateSunAndMoon();
         UpdateDayPhase();
     }
 
     private void UpdateSunAndMoon() {
-        float currentTimeMs = time.GetCurrentTimeMs();
-        float t = currentTimeMs / GameTime.DAY_LENGTH_MS;
-        float angle = 180.0f - Mathf.LerpAngle(0.0f, 180.0f, t);
         if (IsSunPresent()) {
+            float angle = GetSunAngle();
             SetLightAngle(sun, angle);
             moon.intensity = 0.0f;
         } else {
+            float angle = GetMoonAngle();
             SetLightAngle(moon, angle);
             sun.intensity = 0.0f;
         }
@@ -68,6 +80,30 @@ public class DayNightCycle : MonoBehaviour {
         float currentTimeMs = time.GetCurrentTimeMs();
         return currentTimeMs > GameTime.SUNRISE_TIME_MS
                 && currentTimeMs < GameTime.SUNSET_TIME_MS;
+    }
+
+    private float GetSunAngle() {
+        float currentTimeMs = time.GetCurrentTimeMs();
+        // Calculate the sun's progress, in the range 0-1
+        float t = Mathf.InverseLerp(
+                GameTime.SUNRISE_TIME_MS,
+                GameTime.SUNSET_TIME_MS,
+                currentTimeMs);
+        return 180.0f - Mathf.LerpAngle(0.0f, 180.0f, t);
+    }
+
+    private float GetMoonAngle() {
+        float currentTimeMs = time.GetCurrentTimeMs();
+        if (currentTimeMs < GameTime.SUNRISE_TIME_MS) {
+            currentTimeMs += GameTime.DAY_LENGTH_MS;
+        }
+        // Calculate the moon's progress, in the range 0-1
+        float t = Mathf.InverseLerp(
+                // Sunset to sunrise the following day
+                GameTime.SUNSET_TIME_MS,
+                GameTime.DAY_LENGTH_MS + GameTime.SUNRISE_TIME_MS,
+                currentTimeMs);
+        return 180.0f - Mathf.LerpAngle(0.0f, 180.0f, t);
     }
 
     private void SetLightAngle(Light light, float angle) {
@@ -139,6 +175,7 @@ public class DayNightCycle : MonoBehaviour {
         moon.intensity = Mathf.Lerp(MOON_INTENSITY, 0.0f, t);
         RenderSettings.ambientLight =
                 Color.Lerp(AMBIENT_COLOR_NIGHT, AMBIENT_COLOR_DAWN, t);
+        SetSkyColor(Color.Lerp(SKY_TINT_NIGHT, SKY_TINT_DAWN, t));
     }
 
     private void UpdateSunrise() {
@@ -150,11 +187,13 @@ public class DayNightCycle : MonoBehaviour {
         sun.intensity = Mathf.Lerp(0.0f, SUN_INTENSITY, t * 2);
         RenderSettings.ambientLight =
                 Color.Lerp(AMBIENT_COLOR_DAWN, AMBIENT_COLOR_DAY, t);
+        SetSkyColor(Color.Lerp(SKY_TINT_DAWN, SKY_TINT_DAY, t));
     }
 
     private void UpdateDay() {
         sun.intensity = SUN_INTENSITY;
         RenderSettings.ambientLight = AMBIENT_COLOR_DAY;
+        SetSkyColor(SKY_TINT_DAY);
     }
 
     private void UpdateDusk() {
@@ -179,6 +218,7 @@ public class DayNightCycle : MonoBehaviour {
         sun.intensity = Mathf.Lerp(SUN_INTENSITY, 0.0f, t);
         RenderSettings.ambientLight =
                 Color.Lerp(AMBIENT_COLOR_DAY, AMBIENT_COLOR_DUSK, t);
+        SetSkyColor(Color.Lerp(SKY_TINT_DAY, SKY_TINT_DUSK, t));
     }
 
     private void UpdateMoonRise() {
@@ -190,11 +230,17 @@ public class DayNightCycle : MonoBehaviour {
         moon.intensity = Mathf.Lerp(0.0f, MOON_INTENSITY, t * 2);
         RenderSettings.ambientLight =
                 Color.Lerp(AMBIENT_COLOR_DUSK, AMBIENT_COLOR_NIGHT, t);
+        SetSkyColor(Color.Lerp(SKY_TINT_DUSK, SKY_TINT_NIGHT, t));
     }
 
     private void UpdateNight() {
         moon.intensity = MOON_INTENSITY;
         RenderSettings.ambientLight = AMBIENT_COLOR_NIGHT;
+        SetSkyColor(SKY_TINT_NIGHT);
+    }
+
+    private void SetSkyColor(Color color) {
+        RenderSettings.skybox.SetColor(SKYBOX_COLOUR_PARAM, color);
     }
 
 }
