@@ -1,5 +1,18 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1794830546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 174608832987879965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 285a5ecc42c5d3f478e8959f245e8dee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotSpeed: 0.5
 --- !u!1 &1057567592121615557
 GameObject:
   m_ObjectHideFlags: 0
@@ -414,7 +427,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: c4809406b2c91004caf5acbb1d83d59f,
         type: 3}
       propertyPath: m_Name
-      value: Sky Sphere
+      value: Clouds
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: c4809406b2c91004caf5acbb1d83d59f,
         type: 3}
@@ -428,6 +441,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c4809406b2c91004caf5acbb1d83d59f, type: 3}
+--- !u!1 &174608832987879965 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c4809406b2c91004caf5acbb1d83d59f,
+    type: 3}
+  m_PrefabInstance: {fileID: 1057567591828973388}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &659642528035963047 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c4809406b2c91004caf5acbb1d83d59f,

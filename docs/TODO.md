@@ -4,11 +4,9 @@
 
 ### Sky
 
- - Move clouds onto a separate sky "layer"?
- - Improve cloud texture
- - Slowly rotate cloud layer horizontally to give the effect of movement
- - Write a custom skybox shader to render a gradient background
- - Change gradient colours over time
+ - Fade out clouds depending on the weather / time of day
+    - Write a custom cloud shader?
+ - Show stars at night
  - Add sun / moon objects that slowly orbit the camera
  - Weather
 

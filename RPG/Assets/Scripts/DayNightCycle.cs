@@ -240,7 +240,7 @@ public class DayNightCycle : MonoBehaviour {
     }
 
     private void SetSkyColor(Color color) {
-        //RenderSettings.skybox.SetColor(SKYBOX_COLOUR_PARAM, color);
+        RenderSettings.skybox.SetColor(SKYBOX_COLOUR_PARAM, color);
     }
 
 }
