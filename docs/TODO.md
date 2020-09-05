@@ -4,10 +4,12 @@
 
 ### Sky
 
+ - Add distant land / mountain layer
  - Fade out clouds depending on the weather / time of day
     - Write a custom cloud shader?
  - Show stars at night
- - Add sun / moon objects that slowly orbit the camera
+ - Make Celestial Bodies rotate
+ - Add moon object
  - Weather
 
 ### Gameplay

@@ -48,8 +48,9 @@ public class DayNightCycle : MonoBehaviour {
     private Light moon;
 
     void Start() {
-        sun = transform.Find("Sun").GetComponent<Light>();
-        moon = transform.Find("Moon").GetComponent<Light>();
+        Transform sunMoonTransform = transform.Find("Celestial Bodies");
+        sun = sunMoonTransform.transform.Find("Sun").GetComponent<Light>();
+        moon = sunMoonTransform.transform.Find("Moon").GetComponent<Light>();
 
         time = GameLogic.Instance.GameTime;
     }

@@ -23,16 +23,16 @@ public class GameLogic : MonoBehaviour {
 
     void Awake() {
         Instance = this;
+
+        // Start at midnight
+        GameTime = new GameTime(0.0f);
     }
 
     void OnDestroy() {
         Instance = null;
     }
 
-    void Start() {
-        // Start at midnight
-        GameTime = new GameTime(0.0f);
-    }
+    void Start() { }
 
     void Update() {
         GameTime.Update(Time.deltaTime);
