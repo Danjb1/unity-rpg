@@ -8,8 +8,7 @@
  - Fade out clouds depending on the weather / time of day
     - Write a custom cloud shader?
  - Show stars at night
- - Make Celestial Bodies rotate
- - Add moon object
+ - Add moon texture
  - Weather
 
 ### Gameplay
@@ -49,8 +48,6 @@
  - Windows
  - Chimney
  - Fence
- - Sun
- - Moon
 
 ### Sound
 

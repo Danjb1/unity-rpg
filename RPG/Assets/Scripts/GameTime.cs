@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 /**
- * Class responsible for keeping track of in-game time.
+ * Governs the passing of in-game time.
  */
 public class GameTime {
 

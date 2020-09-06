@@ -5,13 +5,10 @@ using UnityEngine;
 using DayPhase = GameTime.DayPhase;
 
 /**
- * Class that governs the passing of in-game time.
+ * Adjusts the sky and lighting based on the current time.
  *
- * There are 24 hours in a day, which are divided into day and night. During the
- * day, the sun rises in the east and sets in the west. During the night, the
- * same is true of the moon.
- *
- * The positive z-axis is considered north.
+ * During the day, the sun rises in the east and sets in the west. During the
+ * night, the same is true of the moon. The positive z-axis is considered north.
  *
  * Day and night each have their own ambient light settings, as do the
  * transitions between them (dusk and dawn).
@@ -21,12 +18,19 @@ using DayPhase = GameTime.DayPhase;
  */
 public class DayNightCycle : MonoBehaviour {
 
-    // Sun / Moon properties
-    private const float SUN_INTENSITY = 1.0f;
-    private const float MOON_INTENSITY = 0.2f;
-    private static readonly Vector3 LIGHT_TILT = new Vector3(-50, 0, 0);
+    /**
+     * Angle of the sun / moon's orbit from vertical.
+     *
+     * A higher value will cause the sun / moon to stay closer to the southern
+     * horizon.
+     */
+    public float lightTilt;
 
-    // Ambient light
+    // Sun / Moon intensity
+    private const float SUN_INTENSITY = 1.0f;
+    private const float MOON_INTENSITY = 0.3f;
+
+    // Ambient light colour
     private static readonly Color AMBIENT_COLOR_DAWN
             = new Color(0.5f, 0.4f, 0.35f);
     private static readonly Color AMBIENT_COLOR_DAY
@@ -43,14 +47,20 @@ public class DayNightCycle : MonoBehaviour {
     private static readonly Color SKY_TINT_DUSK = new Color(0.5f, 0.25f, 0.5f);
     private static readonly Color SKY_TINT_NIGHT = new Color(0.1f, 0.1f, 0.1f);
 
+    // Math constants
+    private const float SUN_ROTATION_PER_MS = 360.0f / GameTime.DAY_LENGTH_MS;
+
     private GameTime time;
+    private Transform sunMoonTransform;
+    private Transform skyboxCameraTransform;
     private Light sun;
     private Light moon;
 
     void Start() {
-        Transform sunMoonTransform = transform.Find("Celestial Bodies");
-        sun = sunMoonTransform.transform.Find("Sun").GetComponent<Light>();
-        moon = sunMoonTransform.transform.Find("Moon").GetComponent<Light>();
+        sunMoonTransform = transform.Find("Celestial Bodies");
+        skyboxCameraTransform = transform.Find("Skybox Camera");
+        sun = sunMoonTransform.Find("Sun").GetComponent<Light>();
+        moon = sunMoonTransform.Find("Moon").GetComponent<Light>();
 
         time = GameLogic.Instance.GameTime;
     }
@@ -61,62 +71,84 @@ public class DayNightCycle : MonoBehaviour {
     }
 
     void Update() {
-        UpdateSunAndMoon();
-        UpdateDayPhase();
+        DisableInactiveLightSource();
+        UpdateSunAndMoonOrbit();
+        UpdateSunAndMoonAngle();
+        UpdateLighting();
     }
 
-    private void UpdateSunAndMoon() {
+    /**
+     * Updates the positions of the sun and moon in the sky.
+     */
+    private void UpdateSunAndMoonOrbit() {
+        // We want to rotate the sunMoonTransform precisely based on game time.
+        // Since the sun and moon are both positioned relative to this
+        // transform, this effectively causes them to orbit its centre.
+        // The y-angle used here ensures that the sun moves from east to west.
+        float rotation = GetSunMoonRotation();
+        sunMoonTransform.eulerAngles = new Vector3(rotation, 90, 0);
+
+        // Finally, we apply a tilt to give the light to give us a more
+        // interesting angle. That is, the sun will not pass directly overhead,
+        // but rather its orbit will lean to one side.
+        sunMoonTransform.transform.Rotate(Vector3.left, lightTilt, Space.World);
+    }
+
+    /**
+     * Calculates the required angle of the sunMoonTransform based on game time.
+     */
+    private float GetSunMoonRotation() {
+        // At sunrise, rotation should be 90
+        // At midday, rotation should be 0
+        // At sunset, rotation should be -90
+        // At midnight, rotation should be -180
+        return 90 - (GetMsSinceSunrise() * SUN_ROTATION_PER_MS);
+    }
+
+    /**
+     * Gets the number of milliseconds since the last sunrise.
+     */
+    private float GetMsSinceSunrise() {
+        return time.GetCurrentTimeMs() - GameTime.SUNRISE_TIME_MS;
+    }
+
+    /**
+     * Updates the angle of the the sun and moon.
+     */
+    private void UpdateSunAndMoonAngle() {
+        // We need to rotate the actual sun / moon objects to ensure that
+        // their light is pointing in the right direction
+        sun.transform.LookAt(skyboxCameraTransform);
+        moon.transform.LookAt(skyboxCameraTransform);
+
+        // The moon faces the wrong way by default, so we need to flip it!
+        moon.transform.Rotate(0, 180, 0);
+    }
+
+    /**
+     * Disables the sun at night, and the moon during the day.
+     */
+    private void DisableInactiveLightSource() {
         if (IsSunPresent()) {
-            float angle = GetSunAngle();
-            SetLightAngle(sun, angle);
             moon.intensity = 0.0f;
         } else {
-            float angle = GetMoonAngle();
-            SetLightAngle(moon, angle);
             sun.intensity = 0.0f;
         }
     }
 
+    /**
+     * Determines if the sun's light should be active.
+     */
     private bool IsSunPresent() {
         float currentTimeMs = time.GetCurrentTimeMs();
         return currentTimeMs > GameTime.SUNRISE_TIME_MS
                 && currentTimeMs < GameTime.SUNSET_TIME_MS;
     }
 
-    private float GetSunAngle() {
-        float currentTimeMs = time.GetCurrentTimeMs();
-        // Calculate the sun's progress, in the range 0-1
-        float t = Mathf.InverseLerp(
-                GameTime.SUNRISE_TIME_MS,
-                GameTime.SUNSET_TIME_MS,
-                currentTimeMs);
-        return 180.0f - Mathf.LerpAngle(0.0f, 180.0f, t);
-    }
-
-    private float GetMoonAngle() {
-        float currentTimeMs = time.GetCurrentTimeMs();
-        if (currentTimeMs < GameTime.SUNRISE_TIME_MS) {
-            currentTimeMs += GameTime.DAY_LENGTH_MS;
-        }
-        // Calculate the moon's progress, in the range 0-1
-        float t = Mathf.InverseLerp(
-                // Sunset to sunrise the following day
-                GameTime.SUNSET_TIME_MS,
-                GameTime.DAY_LENGTH_MS + GameTime.SUNRISE_TIME_MS,
-                currentTimeMs);
-        return 180.0f - Mathf.LerpAngle(0.0f, 180.0f, t);
-    }
-
-    private void SetLightAngle(Light light, float angle) {
-
-        // Rotate the light along the east-west axis
-        light.transform.eulerAngles = new Vector3(angle, 90, 0);
-
-        // Tilt the light to give us a more interesting angle
-        light.transform.Rotate(LIGHT_TILT, Space.World);
-    }
-
-    private void UpdateDayPhase() {
+    /**
+     * Updates the lighting based on the time of day.
+     */
+    private void UpdateLighting() {
         DayPhase phase = time.GetPhase();
         switch (phase) {
             case DayPhase.DAWN:
@@ -134,12 +166,18 @@ public class DayNightCycle : MonoBehaviour {
         }
     }
 
+    /**
+     * Determines the progress through the Daytime phase, in the range 0-1.
+     */
     private float CalculateDaytimeProgress() {
         float dayTimePassed =
                 time.GetCurrentTimeMs() - GameTime.DAYTIME_START_MS;
         return dayTimePassed / GameTime.DAYTIME_LENGTH_MS;
     }
 
+    /**
+     * Determines the progress through the Night phase, in the range 0-1.
+     */
     private float CalculateNightTimeProgress() {
         float nightTimePassed;
         if (time.GetCurrentTimeMs() >= GameTime.NIGHT_START_MS) {
@@ -154,6 +192,9 @@ public class DayNightCycle : MonoBehaviour {
         return nightTimePassed / GameTime.NIGHT_LENGTH_MS;
     }
 
+    /**
+     * Updates the lighting when in the Dawn phase.
+     */
     private void UpdateDawn() {
         // Dawn is further divided into 2 phases: moon setting and sun rising.
         // We need to fully disable one light source before we enable another,
@@ -167,6 +208,9 @@ public class DayNightCycle : MonoBehaviour {
         }
     }
 
+    /**
+     * Updates the lighting when in the first half of the Dawn phase.
+     */
     private void UpdateMoonSet() {
         // Calculate progress through the phase, in the range 0-1
         float t = Mathf.InverseLerp(
@@ -179,6 +223,9 @@ public class DayNightCycle : MonoBehaviour {
         SetSkyColor(Color.Lerp(SKY_TINT_NIGHT, SKY_TINT_DAWN, t));
     }
 
+    /**
+     * Updates the lighting when in the second half of the Dawn phase.
+     */
     private void UpdateSunrise() {
         // Calculate progress through the phase, in the range 0-1
         float t = Mathf.InverseLerp(
@@ -191,12 +238,18 @@ public class DayNightCycle : MonoBehaviour {
         SetSkyColor(Color.Lerp(SKY_TINT_DAWN, SKY_TINT_DAY, t));
     }
 
+    /**
+     * Updates the lighting when in the Daytime phase.
+     */
     private void UpdateDay() {
         sun.intensity = SUN_INTENSITY;
         RenderSettings.ambientLight = AMBIENT_COLOR_DAY;
         SetSkyColor(SKY_TINT_DAY);
     }
 
+    /**
+     * Updates the lighting when in the Dusk phase.
+     */
     private void UpdateDusk() {
         // Dusk is further divided into 2 phases: sun setting and moon rising.
         // We need to fully disable one light source before we enable another,
@@ -210,6 +263,9 @@ public class DayNightCycle : MonoBehaviour {
         }
     }
 
+    /**
+     * Updates the lighting when in the first half of the Dusk phase.
+     */
     private void UpdateSunset() {
         // Calculate progress through the phase, in the range 0-1
         float t = Mathf.InverseLerp(
@@ -222,6 +278,9 @@ public class DayNightCycle : MonoBehaviour {
         SetSkyColor(Color.Lerp(SKY_TINT_DAY, SKY_TINT_DUSK, t));
     }
 
+    /**
+     * Updates the lighting when in the second half of the Dusk phase.
+     */
     private void UpdateMoonRise() {
         // Calculate progress through the phase, in the range 0-1
         float t = Mathf.InverseLerp(
@@ -234,12 +293,18 @@ public class DayNightCycle : MonoBehaviour {
         SetSkyColor(Color.Lerp(SKY_TINT_DUSK, SKY_TINT_NIGHT, t));
     }
 
+    /**
+     * Updates the lighting when in the Night phase.
+     */
     private void UpdateNight() {
         moon.intensity = MOON_INTENSITY;
         RenderSettings.ambientLight = AMBIENT_COLOR_NIGHT;
         SetSkyColor(SKY_TINT_NIGHT);
     }
 
+    /**
+     * Changes the colour of the sky.
+     */
     private void SetSkyColor(Color color) {
         RenderSettings.skybox.SetColor(SKYBOX_COLOUR_PARAM, color);
     }
