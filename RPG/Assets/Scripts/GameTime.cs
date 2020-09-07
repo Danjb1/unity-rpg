@@ -15,7 +15,7 @@ public class GameTime {
 
     // Game time definition
     public const int HOURS_IN_DAY = 24;
-    public const int DAY_LENGTH_MS = 10 * 60 * 1000;  // 10 minutes
+    public const int DAY_LENGTH_MS = 10000;//10 * 60 * 1000;  // 10 minutes
     public const int HOUR_LENGTH_MS = DAY_LENGTH_MS / HOURS_IN_DAY;
 
     // Start times of each period, in hours:

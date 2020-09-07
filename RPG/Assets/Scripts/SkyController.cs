@@ -16,7 +16,7 @@ using DayPhase = GameTime.DayPhase;
  * The environment lighting should have its Sun Source set to None, to ensure
  * that it correctly alternates between the sun and moon.
  */
-public class DayNightCycle : MonoBehaviour {
+public class SkyController : MonoBehaviour {
 
     /**
      * Angle of the sun / moon's orbit from vertical.

@@ -4,11 +4,9 @@
 
 ### Sky
 
- - Add distant land / mountain layer
- - Fade out clouds depending on the weather / time of day
-    - Write a custom cloud shader?
+ - Fade out / colourise clouds / mountains depending on the weather / time of day
+    - Write a custom shader?
  - Show stars at night
- - Add moon texture
  - Weather
 
 ### Gameplay
